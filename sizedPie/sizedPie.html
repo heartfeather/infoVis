@@ -1,15 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>D3 Example</title>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3-legend/1.1.0/d3-legend.js"></script>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <style>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Sized Pie Chart Visualization</title>
+
+    <!-- Bootstrap -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
     
+    <style>
       .axis text {
-        font-family: 'Open Sans', sans-serif;
+        font-family: sans-serif;
         font-size: 20pt;
       }
 
@@ -20,28 +30,41 @@
       }
 
       .color-legend text {
-        font-family: 'Open Sans', sans-serif;
-        font-size: 15pt;
+        font-family: sans-serif;
+        font-size: 12pt;
       }
 
     </style>
   </head>
   <body>
-    <script>
+    <div class="container">
+      <div class="row"><div class="span12"><h1>Sized Pie Chart Visualization</h1></div></div>
+      <div class="row"><div class="span12"><input id="fileInput" type="file" accept=".csv"></div></div>
+      <div class="row"><div class="span12"><div id='content'><svg></svg></div></div></div>
+    </div>
 
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3-legend/1.1.0/d3-legend.js"></script>
+    <script>
       var outerWidth = 460;
       var outerHeight = 500;
       var margin = { left: 95, top: 0, right: 108, bottom: 297 };
 
-      var xColumn = "category";
-      var colorColumn = "skill";
-      var areaColumn = "FTE";
+      var xColumn = "xCol";
+      var colorColumn = "colorCol";
+      var areaColumn = "areaCol";
       var radiusMax = 93;
 
       var innerWidth  = outerWidth  - margin.left - margin.right;
       var innerHeight = outerHeight - margin.top  - margin.bottom;
 
-      var svg = d3.select("body").append("svg")
+      d3.selectAll("#content svg > *").remove();
+      
+      var svg = d3.select("#content svg")
         .attr("width",  outerWidth)
         .attr("height", outerHeight);
       var g = svg.append("g")
@@ -71,9 +94,26 @@
         .shapeWidth(25)
         .shapeHeight(25)
         .labelOffset(4);
+        
+      $("#fileInput").change(function(){
+        var reader = new FileReader();
+        
+        reader.onload = function(event){
+          var dataObj = d3.csv.parse(event.target.result,
+                                    function(d){
+                                      d.name = "Row";
+                                      d.areaCol = +d.areaCol;
+                                      return d;
+                                    });
 
-      function render(data){
-
+          render(dataObj);
+        }
+        
+        reader.readAsText(this.files[0]);
+      });
+      
+      function render(data)
+      {
         var nested = d3.nest()
           .key(function (d){ return d[xColumn]; })
           .entries(data);
@@ -85,7 +125,7 @@
             return d[areaColumn];
           });
         });
-
+        
         xScale.domain(nested.map( function (d){ return d.key; }));
         colorScale.domain(nested[0].values.map(function (d){ return d[colorColumn]; }));
         pie.value(function(d) { return d[areaColumn]; });
@@ -121,15 +161,7 @@
         xAxisG.call(xAxis);
         colorLegendG.call(colorLegend);
       }
-
-      function type(d){
-        d.name = "World";
-        d.FTE = +d.FTE;
-        return d;
-      }
-
-      d3.csv("sizedPie.csv", type, render);
-
+      
     </script>
   </body>
 </html>
