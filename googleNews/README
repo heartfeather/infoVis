@@ -1,0 +1,3 @@
+Example code to call Google News API to query news
+
+Features: search by keyword, "from" date, request results on a page basis, save json file to disk
