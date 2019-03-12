@@ -1,4 +1,4 @@
 # infovis
-web apps related to infovis
+Apps and utils related to infovis
 
-Sized Pie
+Sized Pie: example code to draw sized pie chart based on d3.js
